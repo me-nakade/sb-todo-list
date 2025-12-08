@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>todoリスト</title>
+</head>
+<form id="todoForm">
+  <input name="id">
+  <input name="title" placeholder="todo">
+  <input name="description" placeholder="備考">
+  <button type="submit">追加</button>
+</form>
+<script>
+document.getElementById('todoForm').onsubmit = async e => {
+  e.preventDefault();
+  const title = e.target.title.value;
+  const description = e.target.description.value;
+  const res = await fetch('http://localhost:8080/api/todos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, description })
+  });
+  alert(await res.text());
+};
+</script>
+</html>
