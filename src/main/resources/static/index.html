@@ -6,20 +6,21 @@
 	<title>todoリスト</title>
 </head>
 <form id="todoForm">
-  <input name="id">
-  <input name="title" placeholder="todo">
-  <input name="description" placeholder="備考">
+  やること： <input name="title" placeholder="todo"><br>
+  締切日： <input name="deadline" type="date" placeholder="yyyy-mm-dd"><br>
+  備考: <input name="notes" placeholder="備考"><br>
   <button type="submit">追加</button>
 </form>
 <script>
 document.getElementById('todoForm').onsubmit = async e => {
   e.preventDefault();
   const title = e.target.title.value;
-  const description = e.target.description.value;
+  const deadline = e.target.deadline.value;
+  const notes = e.target.notes.value;
   const res = await fetch('http://localhost:8080/api/todos', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, description })
+    body: JSON.stringify({ title, deadline, notes })
   });
   alert(await res.text());
 };
