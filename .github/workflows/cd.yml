@@ -26,8 +26,7 @@ jobs:
 
       # Dockerイメージビルド
       - name: Build Docker image
-        run: |
-          docker build -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} .
+      - run: docker build -t todo_list:${{ github.sha }} .
 
       # Dockerイメージタグ付け & ECRへpush
       # - name: Push Docker image to ECR
