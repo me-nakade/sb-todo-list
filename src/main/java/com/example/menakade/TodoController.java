@@ -23,7 +23,7 @@ public class TodoController {
         return todo;
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/api/todos/{id}")
     public void deleteTodo(@PathVariable Long id) {
         todoList.removeIf(t -> t.getId().equals(id));
     }

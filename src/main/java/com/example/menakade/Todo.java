@@ -3,12 +3,12 @@ package com.example.menakade;
 public class Todo {
 	private Long id;
 	private String title;
-	private boolean done;
+	private String description;
 	
-	public Todo(Long id, String title, boolean done) {
+	public Todo(Long id, String title, String description) {
 		this.id = id;
 		this.title = title;
-		this.done = done;
+		this.description = description;
 	}
 
 	public Long getId() {
@@ -27,11 +27,12 @@ public class Todo {
 		this.title = title;
 	}
 
-	public boolean isDone() {
-		return done;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setDone(boolean done) {
-		this.done = done;
+	public void setDescription(String description) {
+		this.description = description;
 	}
+
 }
