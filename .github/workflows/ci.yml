@@ -31,10 +31,10 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-    - name: Build with Gradle
-      run: ./gradlew build
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
     - name: Run Tests
-      run: ./gradlew test
+      run: mvn -B test --file pom.xml
 
   sbom:
     name: Generate SBOM
@@ -48,5 +48,5 @@ jobs:
         chmod +x sbom-tool-linux-x64
     - name: Generate SBOM
       run: |
-        ./sbom-tool-linux-x64 generate -b . -bc . -pn "your-project-name" -pv "1.0.0"
+        ./sbom-tool-linux-x64 generate -b . -bc . -pn "todo_list" -pv "0.0.1-SNAPSHOT" -ps "me-nakade"
     # 生成物の保存・アップロードも必要なら適宜追加
