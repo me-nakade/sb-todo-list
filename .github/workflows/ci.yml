@@ -1,0 +1,52 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: java
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v3
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  build-test:
+    name: Build & JUnit Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Run Tests
+      run: ./gradlew test
+
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Download SBOM Tool
+      run: |
+        wget https://github.com/microsoft/sbom-tool/releases/download/v2.0.0/sbom-tool-linux-x64
+        chmod +x sbom-tool-linux-x64
+    - name: Generate SBOM
+      run: |
+        ./sbom-tool-linux-x64 generate -b . -bc . -pn "your-project-name" -pv "1.0.0"
+    # 生成物の保存・アップロードも必要なら適宜追加
