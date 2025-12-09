@@ -10,6 +10,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      # Mavenビルド
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Maven
+        run: ./mvnw clean package -DskipTests
       
       # AWS認証
       # - name: Configure AWS credentials
@@ -34,7 +44,7 @@ jobs:
       # - name: Build Docker image
       #   run: docker build -t todo_list:${{ github.sha }} .
       - name: Build Docker image
-        run: docker build -t myapp .
+        run: docker build -t todo-list .
 
       # Dockerイメージタグ付け & ECRへpush
       # - name: Push Docker image to ECR
