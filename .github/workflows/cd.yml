@@ -24,9 +24,17 @@ jobs:
       #   id: login-ecr
       #   uses: aws-actions/amazon-ecr-login@v2
 
+      # デバッグ
+      - name: Debug root
+        run: ls -l
+      - name: Debug target
+        run: ls -l target
+
       # Dockerイメージビルド
+      # - name: Build Docker image
+      #   run: docker build -t todo_list:${{ github.sha }} .
       - name: Build Docker image
-        run: docker build -t todo_list:${{ github.sha }} .
+        run: docker build -t myapp .
 
       # Dockerイメージタグ付け & ECRへpush
       # - name: Push Docker image to ECR
