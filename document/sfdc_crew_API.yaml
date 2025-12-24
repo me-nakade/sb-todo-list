@@ -1,0 +1,1779 @@
+openapi: 3.0.2
+info:
+  version: 0.0.1
+  title: SFDC -> カスタムCREW API 一覧
+
+  ### 更新内容記述
+  # 1. 最終更新日をDEVリリース日に設定
+  # 2. * 「更新日付 API名 更新内容」の形式で記述
+  # 3. 3か月以上経過している内容は削除する
+  # 4. ↑ versionを更新
+  description: |
+    最終更新 2025年12月24日<br>
+    * **202x年xx月xx日**：**xxx**
+
+servers:
+  - url: "https://xxx.com/v1" # APIをホストしているサーバーのURL
+    description: "本番環境サーバー" # このサーバーに関する追加情報
+  - url: "http://xxxx" # ローカル開発用のサーバーURL
+    description: "開発環境サーバー"
+
+tags:
+  - name: IncomingCall
+    description: "入電中情報通知API"
+  - name: Incident
+    description: "事案API"
+  - name: SensitiveInfo
+    description: "機微情報API"
+  - name: SVPermissionManagement
+    description: "SV権限管理API"
+
+paths:
+  "/incoming-call":
+    post:
+      tags:
+        - IncomingCall
+      summary: "入電中情報通知 <TBD>"
+      description: >-
+        ISSにてセキュリティアラートがすでに上がっている場合、対象の物件から問合せが来たことをISSに通知するAPI。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IncomingCallInfo"
+              description: "入電中情報"
+              required:
+                - salesforce_id
+                - request_date
+                - request_time
+                - base_code
+                - user_code
+                - waiting_area_code
+                - dummy_uc_flag
+                - extension_number
+                - employee_id
+                - csc_recieved_by
+              type: object
+              properties:
+                salesforce_id:
+                    description: "SalseforceID"
+                    type: string
+                    minLength: 18
+                    maxLength: 18
+                    example: "500BE00000DZdjrYAD"
+                request_date:
+                  description: "発生日付"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251116"
+                request_time:
+                  description: "発生時刻"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "151609"
+                base_code:
+                  description: "拠点コード"
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  example: "22"
+                user_code:
+                  description: "ユーザコード"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "495298"
+                waiting_area_code:
+                  description: "待機所コード"
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  example: "010"
+                dummy_uc_flag:
+                  description: "ダミーUCフラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0"
+                extension_number:
+                  description: "CSC内線番号"
+                  type: string
+                  maxLength: 6
+                  example: "522074"
+                employee_id:
+                  description: "社員番号"
+                  type: string
+                  example: "123456"
+                  maxLength: 10
+                csc_recieved_by:
+                  description: "CSC受付者名"
+                  type: string
+                  maxLength: 50
+                  example: "佐藤花子"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/incident":
+    post:
+      tags:
+        - Incident
+      summary: "事案登録要求 <TBD>"
+      description:  >-
+        BE派遣が発生しそうな場合および事案をISSに連携する場合に、ISS側に事案の内容を通知するAPI。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "RegisterIncident"
+              description: "事案登録"
+              required:
+                - request_date
+                - request_time
+                - base_code
+                - user_code
+                - waiting_area_code
+                - dummy_uc_flag
+                - contract_code
+                - incident_number
+                - advance_request_flag
+                - salesforce_id
+                - button_pressed_by_extension
+                - button_pressed_by_csc_id
+                - button_pressed_by_name
+                - recevied_date
+                - recevied_time
+                - incident_register_date
+                - incident_register_time
+                - incident_category
+              type: object
+              properties:
+                request_date:
+                  description: "要求日付"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251116"
+                request_time:
+                  description: "要求時刻"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "151609"
+                base_code:
+                  description: "拠点コード"
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  example: "22"
+                user_code:
+                  description: "ユーザコード"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "495298"
+                waiting_area_code:
+                  description: "待機所コード"
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  example: "010"
+                dummy_uc_flag:
+                  description: "ダミーUCフラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0"
+                contract_code:
+                  description: "契約コード"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "12345678"
+                incident_number:
+                  description: "事案番号"
+                  type: string
+                  example: "1234567890"
+                advance_request_flag:
+                  description: "事前要請フラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "<TBD>"
+                salesforce_id:
+                  description: "SalseforceユーザID"
+                  type: string
+                  minLength: 16
+                  maxLength: 16
+                  example: "500BE00000DZdjrYAD"
+                button_pressed_by_extension:
+                  description: "ボタン押下者内線番号"
+                  type: string
+                  maxLength: 10
+                  example: "522074"
+                button_pressed_by_csc_id:
+                  description: "ボタン押下者CSCID"
+                  type: string
+                  maxLength: 16
+                  example: "123456"
+                button_pressed_by_name:
+                  description: "ボタン押下者氏名"
+                  type: string
+                  maxLength: 50
+                  example: "佐藤花子"
+                recevied_date:
+                  description: "受付日付"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251116"
+                recevied_time:
+                  description: "受付時刻"
+                  minLength: 6
+                  maxLength: 6
+                  type: string
+                  example: "151609"
+                incident_register_date:
+                  description: "事案登録日付"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251116"
+                incident_register_time:
+                  description: "事案登録時刻"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "151609"
+                contact_person_name:
+                  description: "連絡者氏名"
+                  type: string
+                  maxLength: 10
+                  example: "山田太郎"
+                block_name:
+                  description: "ブロック名称"
+                  type: string
+                  maxLength: 16
+                  example: "セキュリティビル"
+                phone_1:
+                  description: "TEL1"
+                  type: string
+                  maxLength: 50
+                  example: "9001234567"
+                phone_1_item:
+                  description: "TEL1アイテム"
+                  type: string
+                  maxLength: 8
+                  example: "<TBD>"
+                phone_2:
+                  description: "TEL2"
+                  type: string
+                  maxLength: 50
+                  example: "9007654321"
+                phone_2_item:
+                  description: "TEL2アイテム"
+                  type: string
+                  maxLength: 8
+                  example: "<TBD>"
+                position:
+                  description: "役職"
+                  type: string
+                  maxLength: 40
+                  example: "部長"
+                unit_block_number:
+                  description: "住戸ブロックNO"
+                  maxLength: 5
+                  type: string
+                  example: "<TBD>"
+                sex:
+                  description: "性別"
+                  type: string
+                  maxLength: 2
+                  example: "1"
+                evacuation_flag:
+                  description: "待避フラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0"
+                restoration_date:
+                  description: "復帰日付"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251116"
+                restoration_time:
+                  description: "復帰時刻"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "151609"
+                reservation_flag:
+                  description: "予約フラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "2"
+                reminder_flag:
+                  description: "催促フラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "1"
+                required_category:
+                  description: "所要区分"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "1"
+                result_report_category:
+                  description: "対応結果報告区分"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "1"
+                cancel_flag:
+                  description: "キャンセルフラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "1"
+                incident_detail:
+                  description: "事案詳細"
+                  type: string
+                  maxLength: 4000
+                  example: "BE派遣を要請したい"
+                incident_category:
+                  description: "事案種別"
+                  type: string
+                  maxLength: 3
+                  example: "J01"
+                medium_category:
+                  description: "中区分"
+                  type: string
+                  maxLength: 40
+                  example: "侵入・非常等、火災・当社機器・その他設備異常など"
+                request_details:
+                  description: "要請内容"
+                  type: string
+                  maxLength: 40
+                  example: "異常内容など"
+                handling_policy:
+                  description: "対応方針"
+                  type: string
+                  maxLength: 4
+                  example: "事案小項目テーブルのコード値"
+                handling_details:
+                  description: "対応内容"
+                  type: string
+                  maxLength: 4
+                  example: "事案詳細項目テーブルのコード値"
+                handling_reminder:
+                  description: "対応催促"
+                  type: boolean
+                  example: "TRUE"
+                required_time_check:
+                  description: "所要時間確認"
+                  type: boolean
+                  example: "TRUE"
+                required_time_answer:
+                  description: "所要時間回答"
+                  type: string
+                  maxLength: 4
+                  example: "123"
+                issue_and_use_datetime:
+                  description: "発生・使用日時"
+                  type: string
+                  maxLength: 12
+                  example: "202512050047"
+                entry_and_exit_request:
+                  description: "入退館要望"
+                  type: string
+                  maxLength: 255
+                  example: "解除;入館予定連絡"
+                set_request:
+                  description: "セット希望"
+                  type: string
+                  maxLength: 255
+                  example: "残業;早出;ノーセット"
+                entry_unlocked:
+                  description: "解除入館"
+                  type: string
+                  maxLength: 255
+                  example: "解除入館;入館オーバー"
+                no_set_anomaly:
+                  description: "ノーセット異常"
+                  type: boolean
+                  example: "TRUE"
+                holiday_contact_and_iss_update_flag:
+                  description: "休日連絡・ISS変更有無"
+                  type: string
+                  maxLength: 50
+                  example: "休日連絡：ISS変更有、休日連絡：ISS変更無"
+                absence_period_start:
+                  description: "不在期間開始"
+                  type: string
+                  maxLength: 12
+                  example: "202512050047"
+                absence_period_end:
+                  description: "不在期間終了"
+                  type: string
+                  maxLength: 12
+                  example: "202512050047"
+                contact_absence:
+                  description: "不在中連絡先"
+                  type: string
+                  maxLength: 500
+                  example: "不在中の緊急連絡先はXXXに変更"
+                temporary_absence_entry:
+                  description: "不在中の途中入館"
+                  type: string
+                  maxLength: 500
+                  example: "不在中に〇〇日に一時的に家政婦が入館する"
+                pet_ragistration:
+                  description: "ペット登録"
+                  type: string
+                  maxLength: 40
+                  example: "ペット不在、ペット在宅、ペット無"
+                order_details:
+                  description: "依頼内容"
+                  type: string
+                  maxLength: 40
+                  example: "R依頼、S依頼、R/S依頼、巡回、問合せ、警備関係連絡、その他、臨時警備,保留/ループ,変更工事,ステッカー,警備見直し,その他,みまもりアプリ安否確認（有償）、点検、工事、清掃、訓練、試験、その他(点検)、点検依頼、補修依頼"
+                requested_task:
+                  description: "依頼作業"
+                  type: string
+                  maxLength: 255
+                  example: "解除/鍵開け;ｾｯﾄ/鍵閉め"
+                sub_task_and_inspection_request:
+                  description: "依頼補作業/点検時依頼"
+                  type: string
+                  maxLength: 40
+                  example: "停電,停電ドロップダウン,扉開放,電話工事,振動工事,その他設備関連連絡"
+                details:
+                  description: "内容"
+                  type: string
+                  maxLength: 255
+                  example: "S176;S177;S178"
+                complete:
+                  description: "終了"
+                  type: boolean
+                  example: "TRUE"
+                signal_category:
+                  description: "信号区分"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0:設定無し 1:信号正常 2:信号異常"
+                inspection_point:
+                  description: "点検箇所"
+                  type: string
+                  maxLength: 255
+                  example: "点検箇所内容"
+                power_outage_dropdown:
+                  description: "停電ドロップダウン"
+                  type: string
+                  maxLength: 40
+                  example: "S235 ※事案小項目テーブルのコード値"
+                change_item:
+                  description: "変更項目"
+                  type: string
+                  maxLength: 500
+                  example: "変更項目内容"
+                addtional_order_details:
+                  description: "追加依頼内容"
+                  type: string
+                  maxLength: 255
+                  example: "A001;A002;A003(追加;不良;破損)"
+                add:
+                  description: "追加"
+                  type: string
+                  maxLength: 3
+                  example: "10"
+                defect:
+                  description: "不良"
+                  type: string
+                  maxLength: 3
+                  example: "111"
+                damage:
+                  description: "破損"
+                  type: string
+                  maxLength: 3
+                  example: "13"
+                key_order_details:
+                  description: "鍵依頼内容"
+                  type: string
+                  maxLength: 2
+                  example: "0:設定無し　1:作成依頼　2:鍵受領　3:その他　4:無し（ﾕｰｻﾞ申告のみ)　5:ﾛｽﾄ登録　6:ｶｰﾄﾞ交換　7:ｼﾘﾝﾀﾞｰ交換　8:拾得物回収　9:未定"
+                key_and_card_related_request:
+                  description: "鍵/カード関連要請"
+                  type: boolean
+                  example: "TRUE"
+                lost_or_received_category:
+                  description: "ロスト/取得区分"
+                  type: string
+                  maxLength: 2
+                  example: "3:ｶｰﾄﾞ&鍵　4:鍵のみ　5:ｶｰﾄﾞのみ"
+                fire_monitoring_type:
+                  description: "火災監視形態"
+                  type: string
+                  maxLength: 255
+                  example: "自火報;当社感知器"
+                construction_type:
+                  description: "建物形態"
+                  type: string
+                  maxLength: 2
+                  example: "0:設定無し　1:独立　2:ﾃﾅﾝﾄ　3:集合住宅　4:不明"
+                disinfection_location:
+                  description: "消毒実施箇所"
+                  type: string
+                  maxLength: 2
+                  example: "0:設定無し　1:全域　2:部分　3:不明"
+                related_party_contact:
+                  description: "関係先への連絡"
+                  type: string
+                  maxLength: 255
+                  example: "A001;A002;A003(消防;管理会社;契約先の意）"
+                user_preliminary_action:
+                  description: "ユーザの事前処置"
+                  type: string
+                  maxLength: 255
+                  example: "A001;A002(ベル停止;煙感取外し)"
+                completion_contact:
+                  description: "終了時の連絡"
+                  type: string
+                  maxLength: 2
+                  example: "0:設定無し　1:有り　2:無し　9:不明"
+                management_number:
+                  description: "管理番号"
+                  type: string
+                  maxLength: 15
+                  example: "管理番号内容"
+                patient_sex:
+                  description: "発症者性別"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0:設定無し 1:男性 2:女性 3:不明"
+                age_category:
+                  description: "年齢区分"
+                  type: string
+                  maxLength: 40
+                  example: "10代"
+                cause_details:
+                  description: "原因状況"
+                  type: string
+                  maxLength: 50
+                  example: "原因状況内容"
+                user:
+                  description: "使用者"
+                  type: string
+                  maxLength: 4
+                  example: "S319 ※事案小項目テーブルのコード連携"
+                prognosis:
+                  description: "予後"
+                  type: string
+                  maxLength: 4
+                  example: "S325 ※事案詳細項目テーブルのコード連携"
+                indicator:
+                  description: "ｲﾝｼﾞｹｰﾀ"
+                  type: string
+                  maxLength: 4
+                  example: "S333 ※事案詳細項目テーブルのコード連携"
+                message:
+                  description: "ﾒｯｾｰｼﾞ"
+                  type: string
+                  maxLength: 4
+                  example: "メッセージ内容"
+                electric_shock:
+                  description: "電気ショック"
+                  type: string
+                  maxLength: 40
+                  example: "有、無、不明"
+                refill_1:
+                  description: "補充品1"
+                  type: string
+                  maxLength: 4
+                  example: "事案小項目　のコード値"
+                refill_1_quantity:
+                  description: "補充品1：個数"
+                  type: string
+                  maxLength: 3
+                  example: "10"
+                refill_2:
+                  description: "補充品2"
+                  type: string
+                  maxLength: 4
+                  example: "事案小項目　のコード値"
+                refill_2_quantity:
+                  description: "補充品2：個数"
+                  type: string
+                  maxLength: 3
+                  example: "5"
+                refill_3:
+                  description: "補充品3"
+                  type: string
+                  maxLength: 4
+                  example: "事案小項目　のコード値"
+                refill_3_quantity:
+                  description: "補充品3：個数"
+                  type: string
+                  maxLength: 3
+                  example: "2"
+                refill_4:
+                  description: "補充品4"
+                  type: string
+                  maxLength: 4
+                  example: "事案小項目　のコード値"
+                refill_4_quantity:
+                  description: "補充品4：個数"
+                  type: string
+                  maxLength: 3
+                  example: "1"
+                urgent_flag_aed:
+                  description: "至急フラグ_AED"
+                  type: boolean
+                  example: "TRUE"
+                refill_delivery_category:
+                  description: "補充品発送区分"
+                  type: string
+                  maxLength: 2
+                  example: "0:設定無し　1:契約先  2:提供先　3:その他"
+                data_analysis_request:
+                  description: "データ解析依頼"
+                  type: boolean
+                  example: "TRUE"
+                requierd_time_response:
+                  description: "所要時間回答"
+                  type: string
+                  maxLength: 40
+                  example: "所要時間回答要（待ち）、所要時間回答要（受領済み）、所要時間回答不要"
+                is_result_required:
+                  description: "対応結果要否"
+                  type: boolean
+                  example: "TRUE"
+                due_date_from:
+                  description: "対応期日(From)"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251203"
+                due_date_to:
+                  description: "対応期日(To)"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251203"
+                urgent_flag:
+                  description: "至急フラグ"
+                  type: boolean
+                  example: "TRUE"
+                time_from:
+                  description: "時間指定(From)"
+                  type: string
+                  minLength: 4
+                  maxLength: 4
+                  example: "2345"
+                time_to:
+                  description: "時間指定(To)"
+                  type: string
+                  minLength: 4
+                  maxLength: 4
+                  example: "2350"
+                deadline_type:
+                  description: "期限"
+                  type: string
+                  maxLength: 2
+                  example: "1:空欄　8:頃　10:厳守"
+                set_time:
+                  description: "セット時刻"
+                  type: string
+                  minLength: 4
+                  maxLength: 4
+                  example: "2345"
+                night: 
+                  description: "泊り"
+                  type: boolean
+                  example: "TRUE"
+                attendance:
+                  description: "出勤"
+                  type: boolean
+                  example: "TRUE"
+                planned_and_start_entry_datetime:
+                  description: "入館予定日時/開始日時"
+                  type: string
+                  maxLength: 12
+                  example: "202512050047"
+                plannd_and_end_exit_datetime:
+                  description: "退館感予定予定日時/終了日時"
+                  type: string
+                  maxLength: 12
+                  example: "202512050047"
+                holiday_from:
+                  description: "休日From"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251204"
+                holiday_to:
+                  description: "休日To"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251205"
+                completion_undetermined_flag:
+                  description: "終了未定フラグ"
+                  type: boolean
+                  example: "TRUE"
+                completion_contact2:
+                  description: "終了時の連絡2"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0:設定無し　1:有り　2:無し　9:不明"
+                reset_handler:
+                  description: "リセット対応者"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "0:設定無し 1:ユーザー 2:セコム、3:未定"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/incident/{incident_number}":
+    delete:
+      tags:
+        - Incident
+      summary: "予約事案削除要求 <TBD>"
+      description:  >-
+        事前ユーザー要請でISSにBE派遣を要請していたが、不要となった場合その旨をISSに通知するAPI。
+      parameters:
+        - in: path
+          name: incident_number
+          schema:
+            type: string
+            minLength: 10
+            maxLength: 10
+          required: true
+          description: "事案番号"
+          example: "1234567890"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "ReservedIncident"
+              description: "予約事案"
+              required:
+                - salesforce_id
+                - request_date
+                - request_time
+                - base_code
+                - user_code
+                - waiting_area_code
+                - dummy_uc_flag
+                - incident_number
+              type: object
+              properties:
+                salesforce_id:
+                  description: "SalseforceID"
+                  type: string
+                  minLength: 18
+                  maxLength: 18
+                  example: "500BE00000DZdjrYAD"
+                request_date:
+                  description: "要求日付"
+                  type: string
+                  minLength: 8
+                  maxLength: 8
+                  example: "20251116"
+                request_time:
+                  description: "要求時刻"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "234534"
+                base_code:
+                  description: "拠点"
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  example: "11"
+                user_code:
+                  description: "ユーザコード"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "123456"
+                waiting_area_code:
+                  description: "待機所コード"
+                  type: string
+                  minLength: 3
+                  maxLength: 3
+                  example: "010"
+                dummy_uc_flag:
+                  description: "ダミーUCフラグ"
+                  type: string
+                  minLength: 1
+                  maxLength: 1
+                  example: "1"
+                incident_number:
+                  description: "事案番号"
+                  type: string
+                  minLength: 10
+                  maxLength: 10
+                  example: "1234567890"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/properties/{base_code}/{user_code}/sensitive-info":
+    get:
+      tags:
+        - SensitiveInfo
+      summary: "機微情報のデータ取得（物件系） <TBD>"
+      description: >-
+        事案登録時、物件マスタ参照時に機微情報をカスタムCREWから取得するAPI。
+      parameters:
+        - in: path
+          name: base_code
+          schema:
+            type: string
+          required: true
+          description: "拠点コード"
+          example: "11"
+        - in: path
+          name: user_code
+          schema:
+            type: string
+          required: true
+          description: "ユーザコード"
+          example: "495298"
+      # requestBody:
+      #   required: true
+      #   content:
+      #     application/json:
+      #       schema:
+      #         title: "GetSensitiveInfoProperty"
+      #         description: "機微情報_物件系"
+      #         required:
+      #           - base_code
+      #           - user_code
+      #         type: object
+      #         properties:
+      #           base_code:
+      #             description: " 拠点コード"
+      #             type: string
+      #             example: "11"
+      #           user_code:
+      #             description: "ユーザコード"
+      #             type: string
+      #             example: "495298"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  base_code:
+                    description: "拠点コード"
+                    type: string
+                    minLength: 2
+                    maxLength: 2
+                    example: "11"
+                  user_code:
+                    description: "ユーザコード"
+                    type: string
+                    minLength: 6
+                    maxLength: 6
+                    example: "495298"
+                  sp_considerations:
+                    description: "特別配慮事項"
+                    type: string
+                    maxLength: 400
+                    example: "特別配慮"
+                  validity_start_date:
+                    description: "有効期間開始日"
+                    type: string
+                    minLength: 8
+                    maxLength: 8
+                    example: "20251201"
+                  validity_end_date:
+                    description: "有効期間終了日"
+                    type: string
+                    minLength: 8
+                    maxLength: 8
+                    example: "20251231"
+                  sp_op_pattern_1:
+                    description: "特殊運用事項パターンNO1（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン1"
+                  sp_op_item_1:
+                    description: "特殊運用事項１（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容1"
+                  sp_op_control_keyword_1:
+                    description: "特殊運用事項管制キーワード１（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード1"
+                  sp_op_edit_category_1:
+                    description: "特殊運用事項編集区分１（期限無し）"
+                    type: string
+                    minLength: 1
+                    maxLength: 1
+                    example: "1"
+                  sp_op_pattern_2:
+                    description: "特殊運用事項パターンNO2（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン2"
+                  sp_op_item_2:
+                    description: "特殊運用事項２（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容2"
+                  sp_op_control_keyword_2:
+                    description: "特殊運用事項管制キーワード２（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード2"
+                  sp_op_edit_category_2:
+                    description: "特殊運用事項編集区分２（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分2"
+                  sp_op_pattern_3:
+                    description: "特殊運用事項パターンNO3（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン3"
+                  sp_op_item_3:
+                    description: "特殊運用事項３（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容3"
+                  sp_op_control_keyword_3:
+                    description: "特殊運用事項管制キーワード３（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード3"
+                  sp_op_edit_category_3:
+                    description: "特殊運用事項編集区分３（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分3"
+                  sp_op_pattern_4:
+                    description: "特殊運用事項パターンNO4（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン4"
+                  sp_op_item_4:
+                    description: "特殊運用事項４（期限無し）"
+                    type: string
+                    maxLength: 420
+                    minLength: 1
+                    example: "内容4"
+                  sp_op_control_keyword_4:
+                    description: "特殊運用事項管制キーワード４（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード4"
+                  sp_op_edit_category_4:
+                    description: "特殊運用事項編集区分４（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分4"
+                  sp_op_pattern_5:
+                    description: "特殊運用事項パターンNO5（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン5"
+                  sp_op_item_5:
+                    description: "特殊運用事項５（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容5"
+                  sp_op_control_keyword_5:
+                    description: "特殊運用事項管制キーワード５（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード5"
+                  sp_op_edit_category_5:
+                    description: "特殊運用事項編集区分５（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分5"
+                  sp_op_pattern_6:
+                    description: "特殊運用事項パターンNO6（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン6"
+                  sp_op_item_6:
+                    description: "特殊運用事項６（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容6"
+                  sp_op_control_keyword_6:
+                    description: "特殊運用事項管制キーワード６（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード6"
+                  sp_op_edit_category_6:
+                    description: "特殊運用事項編集区分６（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分6"
+                  sp_op_pattern_7:
+                    description: "特殊運用事項パターンNO7（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン7"
+                  sp_op_item_7:
+                    description: "特殊運用事項７（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容7"
+                  sp_op_control_keyword_7:
+                    description: "特殊運用事項管制キーワード７（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード7"
+                  sp_op_edit_category_7:
+                    description: "特殊運用事項編集区分７（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分7"
+                  sp_op_pattern_8:
+                    description: "特殊運用事項パターンNO8（期限無し）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン8"
+                  sp_op_item_8:
+                    description: "特殊運用事項８（期限無し）"
+                    type: string
+                    maxLength: 420
+                    example: "内容8"
+                  sp_op_control_keyword_8:
+                    description: "特殊運用事項管制キーワード８（期限無し）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード8"
+                  sp_op_edit_category_8:
+                    description: "特殊運用事項編集区分８（期限無し）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分8"
+                  sp_op_pattern_exp_1:
+                    description: "特殊運用事項パターンNO1（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン1"
+                  sp_op_item_exp_1:
+                    description: "特殊運用事項１（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容1"
+                  sp_op_control_keyword_exp_1:
+                    description: "特殊運用事項管制キーワード１（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード1"
+                  sp_op_edit_category_exp_1:
+                    description: "特殊運用事項編集区分１（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分1"
+                  sp_op_pattern_exp_2:
+                    description: "特殊運用事項パターンNO2（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン2"
+                  sp_op_item_exp_2:
+                    description: "特殊運用事項２（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容2"
+                  sp_op_control_keyword_exp_2:
+                    description: "特殊運用事項管制キーワード２（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード2"
+                  sp_op_edit_category_exp_2:
+                    description: "特殊運用事項編集区分２（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分2"
+                  sp_op_pattern_exp_3:
+                    description: "特殊運用事項パターンNO3（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン3"
+                  sp_op_item_exp_3:
+                    description: "特殊運用事項３（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容3"
+                  sp_op_control_keyword_exp_3:
+                    description: "特殊運用事項管制キーワード３（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード3"
+                  sp_op_edit_category_exp_3:
+                    description: "特殊運用事項編集区分３（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分3"
+                  sp_op_pattern_exp_4:
+                    description: "特殊運用事項パターンNO4（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン4"
+                  sp_op_item_exp_4:
+                    description: "特殊運用事項４（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容4"
+                  sp_op_control_keyword_exp_4:
+                    description: "特殊運用事項管制キーワード４（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード4"
+                  sp_op_edit_category_exp_4:
+                    description: "特殊運用事項編集区分４（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分4"
+                  sp_op_pattern_exp_5:
+                    description: "特殊運用事項パターンNO5（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン5"
+                  sp_op_item_exp_5:
+                    description: "特殊運用事項５（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容5"
+                  sp_op_control_keyword_exp_5:
+                    description: "特殊運用事項管制キーワード５（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード5"
+                  sp_op_edit_category_exp_5:
+                    description: "特殊運用事項編集区分５（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分5"
+                  sp_op_pattern_exp_6:
+                    description: "特殊運用事項パターンNO6（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン6"
+                  sp_op_item_exp_6:
+                    description: "特殊運用事項６（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容6"
+                  sp_op_control_keyword_exp_6:
+                    description: "特殊運用事項管制キーワード６（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード6"
+                  sp_op_edit_category_exp_6:
+                    description: "特殊運用事項編集区分６（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分6"
+                  sp_op_pattern_exp_7:
+                    description: "特殊運用事項パターンNO7（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン7"
+                  sp_op_item_exp_7:
+                    description: "特殊運用事項７（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容7"
+                  sp_op_control_keyword_exp_7:
+                    description: "特殊運用事項管制キーワード７（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード7"
+                  sp_op_edit_category_exp_7:
+                    description: "特殊運用事項編集区分７（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分7"
+                  sp_op_pattern_exp_8:
+                    description: "特殊運用事項パターンNO8（期限あり）"
+                    type: string
+                    maxLength: 4
+                    example: "パターン8"
+                  sp_op_item_exp_8:
+                    description: "特殊運用事項８（期限あり）"
+                    type: string
+                    maxLength: 420
+                    example: "内容8"
+                  sp_op_control_keyword_exp_8:
+                    description: "特殊運用事項管制キーワード８（期限あり）"
+                    type: string
+                    maxLength: 12
+                    example: "キーワード8"
+                  sp_op_edit_category_exp_8:
+                    description: "特殊運用事項編集区分８（期限あり）"
+                    type: string
+                    maxLength: 1
+                    minLength: 1
+                    example: "区分8"
+                  op_item_period_start_date:
+                    description: "運用事項期間指定開始日"
+                    type: string
+                    example: "20251201"
+                  op_item_period_end_date:
+                    description: "運用事項期間指定終了日"
+                    type: string
+                    example: "20251231"
+                  property_notes:
+                    description: "物件留意点"
+                    type: string
+                    maxLength: 420
+                    example: "犬がいる"
+                  notes_bsc:
+                    description: "留意点（BSC用）"
+                    type: string
+                    maxLength: 1024
+                    example: "留意点BSC用"
+                  notes_csc:
+                    description: "留意点（CSC用）"
+                    type: string
+                    maxLength: 1000
+                    example: "留意点CSC用"
+                  notes_scc:
+                    description: "留意点（SCC用）"
+                    type: string
+                    maxLength: 2000
+                    example: "留意点SCC用"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/contact-people/{base_code}/{user_code}/{phonebook_id}/sensitive-info":
+    get:
+      tags:
+        - SensitiveInfo
+      summary: "機微情報のデータ取得（連絡者系） <TBD>"
+      description: >-
+        事案登録時、連絡者マスタ参照時に機微情報をカスタムCREWから取得するAPI。
+      parameters:
+        - in: path
+          name: base_code
+          schema:
+            type: string
+          required: true
+          description: "拠点コード"
+          example: "11"
+        - in: path
+          name: user_code
+          schema:
+            type: string
+          required: true
+          description: "ユーザコード"
+          example: "495298"
+        - in: path
+          name: phonebook_id
+          schema:
+            type: string
+          required: true
+          description: "電話帳ID"
+          example: "500BE00000DZdjrYAD"
+      # requestBody:
+      #   required: true
+      #   content:
+      #     application/json:
+      #       schema:
+      #         title: "GetSensitiveInfoContactPerson"
+      #         description: "機微情報_連絡者系"
+      #         required:
+      #           - phonebook_id
+      #           - base_code
+      #           - user_code
+      #         type: object
+      #         properties:
+      #           phonebook_id:
+      #             description: "電話帳ID"
+      #             type: string
+      #             example: "500BE00000DZdjrYAD"
+      #           base_code:
+      #             description: "拠点コード"
+      #             type: string
+      #             example: "11"
+      #           user_code:
+      #             description: "ユーザコード"
+      #             type: string
+      #             example: "495298"
+      responses:
+        "200":
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  phonebook_id:
+                    description: "電話帳ID"
+                    type: string
+                    minLength: 18
+                    maxLength: 18
+                    example: "500BE00000DZdjrYAD"
+                  base_code:
+                    description: "拠点コード"
+                    type: string
+                    minLength: 2
+                    maxLength: 2
+                    example: "11"
+                  user_code:
+                    description: "ユーザコード"
+                    type: string
+                    minLength: 6
+                    maxLength: 6
+                    example: "495298"
+                  phonebook_notes:
+                    description: "電話帳留意点"
+                    type: string
+                    maxLength: 1000
+                    example: "留意点内容"
+                  remarks_nuo:
+                    description: "特記事項"
+                    type: string
+                    maxLength: 500
+                    example: "特記事項内容"
+                  cations_nuo:
+                    description: "注意事項"
+                    type: string
+                    maxLength: 2000
+                    example: "注意事項内容"
+
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/properties/sensitive-info":
+    put:
+      tags:
+        - SensitiveInfo
+      summary: "機微情報のデータ登録（物件系） <TBD>"
+      description: >-
+        物件・連絡者マスタから機微情報を登録した際にカスタムCREWへ連携するAPI。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "RegisterSensitiveInfoNotes"
+              description: "機微情報のデータ登録"
+              required:
+                - salesforce_id
+                - base_code
+                - user_code
+                - property_notes
+                - notes_bsc
+                - remarks_nuo
+                - notes_scc
+                - phonebook_notes
+              type: object
+              properties:
+                salesforce_id:
+                  description: "SalseforceID"
+                  type: string
+                  minLength: 18
+                  maxLength: 18
+                  example: "500BE00000DZdjrYAD"
+                base_code:
+                  description: "拠点コード"
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  example: "11"
+                user_code:
+                  description: "ユーザコード"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "495298"
+                property_notes:
+                  description: "物件留意点"
+                  type: string
+                  maxLength: 1000
+                  example: "犬がいる"
+                notes_bsc:
+                  description: "留意点（BSC用）"
+                  type: string
+                  maxLength: 1000
+                  example: "留意点BSC用"
+                remarks_nuo:
+                  description: "特記事項"
+                  type: string
+                  maxLength: 500
+                  example: "特記事項内容"
+                notes_scc:
+                  description: "留意点（SCC用）"
+                  type: string
+                  maxLength: 2000
+                  example: "留意点SCC用"
+                phonebook_notes:
+                  description: "電話帳留意点"
+                  type: string
+                  maxLength: 1000
+                  example: "留意点内容"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/contact-people/sensitive-info":
+    put:
+      tags:
+        - SensitiveInfo
+      summary: "機微情報のデータ登録（連絡者系） <TBD>"
+      description: >-
+        物件・連絡者マスタから機微情報を登録した際にカスタムCREWへ連携するAPI。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "RegisterSensitiveInfoNotes"
+              description: "機微情報のデータ登録"
+              required:
+                - salesforce_id
+                - base_code
+                - user_code
+                - property_notes
+                - notes_bsc
+                - remarks_nuo
+                - notes_scc
+                - phonebook_notes
+              type: object
+              properties:
+                salesforce_id:
+                  description: "SalseforceID"
+                  type: string
+                  minLength: 18
+                  maxLength: 18
+                  example: "500BE00000DZdjrYAD"
+                base_code:
+                  description: "拠点コード"
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  example: "11"
+                user_code:
+                  description: "ユーザコード"
+                  type: string
+                  minLength: 6
+                  maxLength: 6
+                  example: "495298"
+                property_notes:
+                  description: "物件留意点"
+                  type: string
+                  maxLength: 1000
+                  example: "犬がいる"
+                notes_bsc:
+                  description: "留意点（BSC用）"
+                  type: string
+                  maxLength: 1000
+                  example: "留意点BSC用"
+                remarks_nuo:
+                  description: "特記事項"
+                  type: string
+                  maxLength: 500
+                  example: "特記事項内容"
+                notes_scc:
+                  description: "留意点（SCC用）"
+                  type: string
+                  maxLength: 2000
+                  example: "留意点SCC用"
+                phonebook_notes:
+                  description: "電話帳留意点"
+                  type: string
+                  maxLength: 1000
+                  example: "留意点内容"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+
+  "/users/permission/{login_employee_id}":
+    put:
+      tags:
+        - SVPermissionManagement
+      summary: "ログイン情報の連携 <TBD>"
+      description: >-
+        SFDCからログイン情報を連携する。←ログインユーザにSV権限を付与する。
+      parameters:
+        - in: path
+          name: login_employee_id
+          schema:
+            type: string
+            maxLength: 10
+          required: true
+          description: "ログイン者社員番号"
+          example: "999999"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "LoginUser"
+              description: "ログインユーザ"
+              required:
+                - login_employee_id
+                - login_employee_name
+                - sv_flag
+                - sc_flag
+                - group_flag
+                - sfdc_login_datetime
+              type: object
+              properties:
+                login_employee_id:
+                  description: "ログイン者社員番号"
+                  type: string
+                  maxLength: 10
+                  example: "999999"
+                login_employee_name:
+                  description: "ログイン者氏名"
+                  type: string
+                  maxLength: 30
+                  example: "セコム太郎" 
+                sv_flag:
+                  description: "SVフラグ<br>【マッピング】<br>00:一般 1:SV"
+                  type: integer
+                  minLength: 1
+                  example: 1     
+                sc_flag:
+                  description: "SCフラグ<br>【マッピング】<br>0:CSC 1:BSC 9:不明"
+                  type: integer
+                  minLength: 1
+                  example: 1
+                group_flag:
+                  description: "GROUP区分<br>【マッピング】<br>1:八幡山 2:千葉 3博多"
+                  type: integer
+                  minLength: 1
+                  example: 1
+                sfdc_login_datetime:
+                  description: "セールスフォースログイン日時"
+                  type: string
+                  format: date-time
+                  example: "YYYY-MM-DD HH:MI:SS"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+  "/users/permission/{logout_employee_id}":
+    delete:
+      tags:
+        - SVPermissionManagement
+      summary: "ログアウト情報の連携 <TBD>"
+      description: >-
+        SFDCからログアウト情報を連携する。←ログアウトユーザからSV権限を剥奪する。
+      parameters:
+        - in: path
+          name: logout_employee_id
+          schema:
+            type: string
+            maxLength: 10
+          required: true
+          description: "ログアウト者社員番号"
+          example: "999999"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "LogoutUser"
+              description: "ログアウトユーザ"
+              required:
+                - login_employee_id
+                - sfdc_logout_datetime
+              type: object
+              properties:
+                login_employee_id:
+                  description: "ログイン者社員番号"
+                  type: string
+                  maxLength: 10
+                  example: "999999"
+                sfdc_logout_datetime:
+                  description: "セールスフォースログアウト日時"
+                  type: string
+                  format: date-time
+                  example: "YYYY-MM-DD HH:MI:SS"
+      responses:
+        "200":
+          description: "OK"
+        "400":
+          description: "Bad Requset"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp400"
+        "500":
+          description: "システムエラー"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponseHttp500"
+
+components:
+  schemas:
+    # ApiResponse:
+    #   description: >-
+    #     処理結果を返す。
+    #   type: object
+    #   properties:
+    #     httpCode:
+    #       description: "httpステータスコード"
+    #       type: integer
+    #       example: 200
+    #     httpMessage:
+    #       description: "httpメッセージ"
+    #       type: string
+    #       example: "OK"
+    ErrorResponseHttp400:
+      description: >-
+        パラメータやプロパティに不正があった場合のエラー(HTTP 400)
+      properties:
+        fields:
+          description: "エラー詳細情報"
+          type: array
+          items:
+            type: object
+            properties:
+              parameter:
+                type: string
+                description: "エラーとなったパラメータ名"
+                example: "base_code"
+              message:
+                type: string
+                description: "この項目に対するエラー内容"
+                example: "未入力です"
+    ErrorResponseHttp500:
+      description: >-
+        APIエラーレスポンスオブジェクト。
+      type: object
+      properties:
+        fields:
+          description: "エラー詳細情報"
+          type: string
+          example: "システムエラーが発生しました。"
