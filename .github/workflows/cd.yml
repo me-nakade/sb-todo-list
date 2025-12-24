@@ -1,0 +1,59 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Mavenビルド
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Make mvnw executable
+        run: chmod +x mvnw
+
+      - name: Build with Maven
+        run: ./mvnw clean package -DskipTests
+      
+      # AWS認証
+      # - name: Configure AWS credentials
+        # uses: aws-actions/configure-aws-credentials@v3
+        # with:
+        #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        #   aws-region: ap-northeast-1  # 東京リージョンなど、合わせて記載
+
+      # ECRへログイン
+      # - name: Login to Amazon ECR
+      #   id: login-ecr
+      #   uses: aws-actions/amazon-ecr-login@v2
+
+      # デバッグ
+      - name: Debug root
+        run: ls -l
+      - name: Debug target
+        run: ls -l target
+
+      # Dockerイメージビルド
+      # - name: Build Docker image
+      #   run: docker build -t todo_list:${{ github.sha }} .
+      - name: Build Docker image
+        run: docker build -t todo-list .
+
+      # Dockerイメージタグ付け & ECRへpush
+      # - name: Push Docker image to ECR
+      #   env:
+      #     ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+      #     ECR_REPOSITORY: your-ecr-repository-name   # 例: todo_list
+      #   run: |
+      #     docker tag ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }} ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+      #     docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest

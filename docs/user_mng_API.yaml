@@ -1,0 +1,1749 @@
+openapi: 3.0.2
+info:
+  version: 1.0.5
+  title: ユーザー管理API 一覧
+
+  ### 更新内容記述
+  # 1. 最終更新日をDEVリリース日に設定
+  # 2. * 「API名 更新日付 更新内容」の形式で記述
+  # 3. 3か月以上経過している内容は削除する
+  # 4. ↑ versionを更新
+  description: |
+    最終更新 2025年12月3日<br>
+    * **2025年11月14日**：**ユーザー招待API** 追加
+    * **2025年11月20日**：**ユーザー本登録API** 改修に応じた修正
+    * **2025年11月21日**：**招待情報取得API** 追加
+    * **2025年12月2日**：**一時ユーザー作成API** 廃止（猶予期間中は後継APIに転送）
+    * **2025年12月2日**：レスポンス追加
+      * アバター作成API
+      * アバター削除API
+    * **2025年12月3日**：**新規ユーザー申込API** 追加
+
+tags:
+  - name: USER
+    description: "ユーザー管理API"
+  - name: SPRT
+    description: "問合せAPI"
+
+paths:
+  # IF-UM-USER-0001 API
+  "/contract/servicecore/user/{user_mng_id}":
+    get:
+      tags:
+        - USER
+      summary: "サービスコアID取得API"
+      description: >-
+        'サービスコアID取得API
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+        - in: path
+          name: user_mng_id
+          schema:
+            type: string
+          required: true
+          description: "ユーザー管理ＩＤ"
+          example: "a88c1f7b-c45a-00eb-8f33-a0464ba3689f"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: "srv_core_Response"
+                description: "サービスコアIDレスポンス"
+                type: object
+                properties:
+                  service_core_list:
+                    description: "サービスコアIDのリスト"
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        service_core_id:
+                          description: "サービスコアＩＤ"
+                          type: string
+                          example: "a88c1f7b-c45a-00eb-8f33-a0464ba3689f"
+
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗
+            <br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常
+            <br>
+            ※bodyは400と同様
+
+  # IF-UM-SPRT-0001 API
+  "/user/support":
+    post:
+      tags:
+        - SPRT
+      summary: "ユーザー問合せ登録API <IF-UM-SPRT-0001>"
+      description: >-
+        ユーザー問合せ登録API
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-SPRT-0001_Request"
+              description: "問合せ内容"
+              required:
+                - avatar_id
+                - topic
+                - sub_topic
+                - subject
+                - body
+              type: object
+              properties:
+                avatar_id:
+                  description: "アバターID"
+                  type: integer
+                  example: 1
+                topic:
+                  description: "問合せ分類1"
+                  type: string
+                  example: "アプリや機器について"
+                sub_topic:
+                  description: "問合せ分類2"
+                  type: string
+                  example: "カメラについて"
+                subject:
+                  description: "件名"
+                  type: string
+                  example: "カメラの不調"
+                body:
+                  description: "本文"
+                  type: string
+                  example: "最近カメラのライブ映像が見れません。"
+                camera_id:
+                  description: "カメラID<br> 問合せ分類2が「カメラについて」の場合、必須"
+                  type: integer
+                  example: 20347
+                ope_browse_flag:
+                  description: "オペレーターカメラ閲覧フラグ<br>問合せ分類2が「カメラについて」の場合、必須<br> 【マッピング】0:拒否 1:許可"
+                  type: integer
+                  example: 1
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: "処理結果。0：正常終了、1：異常終了"
+                    type: integer
+                    example: 0
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗
+            <br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常
+            <br>
+            ※bodyは400と同様
+
+  # IF-UM-USER-0002 API
+  "/user/avatar":
+    post:
+      tags:
+        - USER
+      summary: "アバター作成API <IF-UM-USER-0002>"
+      description: ユーザー本登録後にCBESのアバター情報を作成するAPI
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+        - in: header
+          name: invitation-token
+          schema:
+            type: string
+          required: true
+          description: "招待トークンヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0002_Request"
+              description: "アバター情報"
+              required:
+                - user_mng_id
+              type: object
+              properties:
+                user_mng_id:
+                  description: "ユーザー管理ID"
+                  type: string
+                  example: "f1a76bcf-22d5-a319-ac72-4cc0d5b3087c"
+                name:
+                  description: "ニックネーム"
+                  type: string
+                  example: "アバター１"
+
+      responses:
+        "200":
+          description: 正常終了
+          content:
+            application/json:
+              schema:
+                title: "avatar_Response"
+                description: "アバター作成レスポンス"
+                type: object
+                properties:
+                  avatar_id:
+                    description: "アバターID"
+                    type: integer
+                    example: 1
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 10000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+        "403":
+          description: "認証エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                idtoken_error:
+                  summary: エラーコード:30000
+                  value:
+                    errorCode: 30000
+                    message: "認可無効"
+                idtoken_decode_error:
+                  summary: エラーコード:30001
+                  value:
+                    errorCode: 30001
+                    message: "IDトークンデコード処理エラー"
+                invitation_token_error:
+                  summary: エラーコード:30010
+                  value:
+                    errorCode: 30010
+                    message: "招待トークン取得エラー"
+        "404":
+          description: "データなし"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                invitation_data_error:
+                  summary: エラーコード:40000
+                  value:
+                    errorCode: 40000
+                    message: "招待情報取得エラー"
+                camera_group_data_error:
+                  summary: エラーコード:40010
+                  value:
+                    errorCode: 30001
+                    message: "カメラグループ権限情報取得エラー"
+        "500":
+          description: "内部エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                cbes_avatar_error:
+                  summary: エラーコード:91200
+                  value:
+                    errorCode: 91200
+                    message: "CBES_アバター作成APIエラー"
+                cbes_role_error:
+                  summary: エラーコード:91210
+                  value:
+                    errorCode: 91210
+                    message: "CBES_アバター/ロール変更APIエラー"
+                camera_group_error:
+                  summary: エラーコード:92000
+                  value:
+                    errorCode: 92000
+                    message: "カメラグループ権限エラー"
+
+  "/user/invitation":
+    get:
+      tags:
+        - USER
+      summary: "招待情報取得API <IF-UM-USER-0007>"
+      description: >-
+        招待情報取得API
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+        - in: header
+          name: invitation-token
+          schema:
+            type: string
+          required: true
+          description: "invitation-tokenヘッダ<br>招待トークン"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: "invitation_user_response"
+                description: "招待情報レスポンス"
+                type: object
+                properties:
+                  invitation_status:
+                    description: >-
+                      招待状況<br>
+                      pending：未承諾<br>
+                      accepted：承諾済<br>
+                      revoked：招待取り消し<br>
+                      expired：有効期限切れ<br>
+                      superseded：再送済<br>
+                      rejected：拒否'
+                    type: string
+                    example: "accepted"
+                  organization_name:
+                    description: "組織名"
+                    type: string
+                    example: "組織1"
+                  mail_address:
+                    description: "メールアドレス"
+                    type: string
+                    example: "test@secom.co.jp"
+                  user_mng_id:
+                    description: "ユーザー管理ID"
+                    type: string
+                    example: "02832afc-5a0f-4300-b64a-91ed82421523"
+                  expiration_date:
+                    description: "認証コードの有効期限(日時)"
+                    type: string
+                    example: "2025-05-27 10:52:33"
+                  camera_group_info:
+                    description: "所属するカメラグループ情報一覧(ユーザーアプリからの招待時のみ)"
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        camera_group_name:
+                          description: "カメラグループ名"
+                          type: string
+                          example: "グループ1"
+                        authority:
+                          description: "カメラグループの権限<br>0 [ライブ映像のみ閲覧] / 1 [すべて閲覧]"
+                          type: integer
+                          example: 1
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 10000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+        "403":
+          description: "認可エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 30000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "招待トークン取得エラー"
+        "404":
+          description: "データなし"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 40000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "招待情報取得エラー"
+        "500":
+          description: "内部エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 91101
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "招待情報取得エラー(有効期限なし)"
+    post:
+      tags:
+        - USER
+      summary: "ユーザー招待API <IF-UM-USER-0003>"
+      description: >-
+        指定したメールアドレスのユーザーを指定した組織のカメラグループへ招待するAPI
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0003_Request"
+              description: "ユーザー招待情報"
+              required:
+                - mail_address
+                - avatar_id
+                - camera_directory_id
+                - auth_list
+              type: object
+              properties:
+                mail_address:
+                  description: "メールアドレス"
+                  type: string
+                  example: "example@xxx.com"
+                avatar_id:
+                  description: "アバターID"
+                  type: integer
+                  example: 1
+                camera_directory_id:
+                  description: "カメラディレクトリID"
+                  type: integer
+                  example: 1
+                auth_list:
+                  description: カメラグループ権限情報
+                  type: array
+                  items:
+                    required:
+                      - camera_group_id
+                      - authority
+                    type: object
+                    properties:
+                      camera_group_id:
+                        description: "カメラグループID"
+                        type: integer
+                        example: 16
+                      camera_group_name:
+                        description: "カメラグループ名"
+                        type: string
+                        example: "グループ1"
+                      authority:
+                        description: "カメラグループ権限<br>0 [ライブ映像のみ閲覧] / 1 [すべて閲覧]"
+                        type: integer
+                        example: 0
+      responses:
+        "200":
+          description: 正常終了
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: "処理結果"
+                    type: integer
+                    example: 0
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 10000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+        "403":
+          description: "認可エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 30000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                cognito_error:
+                  summary: エラーコード:30000
+                  value:
+                    errorCode: 30000
+                    message: "認可無効"
+                decode_error:
+                  summary: エラーコード:30001
+                  value:
+                    errorCode: 30001
+                    message: "IDトークンデコード処理エラー"
+        "404":
+          description: "データなし"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 40000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                no_avatar:
+                  summary: エラーコード:40000
+                  value:
+                    errorCode: 40000
+                    message: "CBES_アバターデータなし"
+                no_owner_avatar:
+                  summary: エラーコード:40001
+                  value:
+                    errorCode: 40001
+                    message: "指定アバター（オーナー）取得エラー"
+                no_camera_group:
+                  summary: エラーコード:40010
+                  value:
+                    errorCode: 40010
+                    message: "指定カメラグループ存在なしエラー"
+                no_service_core:
+                  summary: エラーコード:40020
+                  value:
+                    errorCode: 40020
+                    message: "サービスコア情報取得エラー"
+
+        "409":
+          description: "組織重複"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 71000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "組織所属済みエラー"
+        "500":
+          description: "内部エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 40000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                avatar_error:
+                  summary: エラーコード:91200
+                  value:
+                    errorCode: 91200
+                    message: "CBES_アバター取得APIエラー"
+                camera_group_error:
+                  summary: エラーコード:91210
+                  value:
+                    errorCode: 91210
+                    message: "CBES_カメラグループ取得APIエラー"
+
+  # IF-UM-USER-0007
+  "/temporary_user":
+    get:
+      tags:
+        - USER
+      summary: "招待情報取得API <IF-UM-USER-0007>"
+      description: >-
+        招待情報取得API
+      parameters:
+        - in: query
+          name: tmp_user_mng_id
+          schema:
+            type: string
+          required: true
+          description: "一時ユーザ管理ID"
+          example: "02832afc-5a0f-4300-b64a-91ed82421523"
+        - in: query
+          name: salesforce_contact_id
+          schema:
+            type: string
+          required: false
+          description: "Salesforce取引先責任者ID<br>既存ユーザからの詳細の場合値なし"
+          example: "0035D00001V8nClQAJ"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: "tmp_user_response"
+                description: "一時ユーザー情報レスポンス"
+                type: object
+                properties:
+                  invitation_status:
+                    description: "招待状況<br>　0:招待中<br>　1:承認済"
+                    type: integer
+                    example: 0
+                  organization_name:
+                    description: "組織名"
+                    type: string
+                    example: "組織1"
+                  mail_address:
+                    description: "メールアドレス"
+                    type: string
+                    example: "test@secom.co.jp"
+                  user_mng_id:
+                    description: "ユーザー管理ID"
+                    type: string
+                    example: "02832afc-5a0f-4300-b64a-91ed82421523"
+                  user_type:
+                    description: "ユーザー種別(SightsIDをSalesforceより作成した場合のみ)<br>　0:toB<br>　1:toC"
+                    type: integer
+                    example: 0
+                  expiration_date:
+                    description: "認証コードの有効期限(日時)"
+                    type: string
+                    example: "2025-05-27 10:52:33"
+                  camera_group_info:
+                    description: "所属するカメラグループ情報一覧(ユーザーアプリからの招待時のみ)"
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        camera_group_name:
+                          description: "カメラグループ名"
+                          type: string
+                          example: "グループ1"
+                        authority:
+                          description: "カメラグループの権限<br>0 [ライブ映像のみ閲覧] / 1 [すべて閲覧]"
+                          type: integer
+                          example: 1
+
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗<br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常<br>
+            ※bodyは400と同様
+
+    #IF-UM-USER-0003 API
+    post:
+      tags:
+        - USER
+      summary: "一時ユーザー作成API <IF-UM-USER-0003>"
+      description: >-
+        <b>招待フロー改修に伴い、本APIは削除となる。<br>
+        猶予期間中は、後継APIである POST /user/invitation に処理を転送するAPIとする。<br><br>
+        ※本APIからの呼び出しの場合、camera_group_name の情報は含まれないため、<br>
+        　新規招待操作時にカメラグループ名の描画がされない点に注意すること。</b><br><br>
+        -----以下、旧API説明-----<br>
+        招待されたユーザー情報を一時ユーザーとして登録し、招待メールを送信するAPI<br>
+        【想定呼出】<br>
+        ・招待機能での操作により、招待ユーザーのメールアドレスを入力して確定した際
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0003_Request"
+              description: "一時ユーザー情報"
+              required:
+                - mail_address
+                - avatar_id
+                - camera_directory_id
+                - auth_list
+              type: object
+              properties:
+                mail_address:
+                  description: "メールアドレス"
+                  type: string
+                  example: "example@xxx.com"
+                avatar_id:
+                  description: "アバターID"
+                  type: integer
+                  example: 1
+                camera_directory_id:
+                  description: "カメラディレクトリID"
+                  type: integer
+                  example: 1
+                auth_list:
+                  description: カメラグループ権限情報
+                  type: array
+                  items:
+                    required:
+                      - camera_group_id
+                      - authority
+                    type: object
+                    properties:
+                      camera_group_id:
+                        description: "カメラグループID"
+                        type: integer
+                        example: 16
+                      camera_group_name:
+                        description: "カメラグループ名"
+                        type: string
+                        example: "グループ1"
+                      authority:
+                        description: "カメラグループ権限<br>0 [ライブ映像のみ閲覧] / 1 [すべて閲覧]"
+                        type: integer
+                        example: 0
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: "処理結果"
+                    type: integer
+                    example: 0
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 10000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+        "403":
+          description: "認可エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 30000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                cognito_error:
+                  summary: エラーコード:30000
+                  value:
+                    errorCode: 30000
+                    message: "認可無効"
+                decode_error:
+                  summary: エラーコード:30001
+                  value:
+                    errorCode: 30001
+                    message: "IDトークンデコード処理エラー"
+        "404":
+          description: "データなし"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 40000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                no_avatar:
+                  summary: エラーコード:40000
+                  value:
+                    errorCode: 40000
+                    message: "CBES_アバターデータなし"
+                no_owner_avatar:
+                  summary: エラーコード:40001
+                  value:
+                    errorCode: 40001
+                    message: "指定アバター（オーナー）取得エラー"
+                no_camera_group:
+                  summary: エラーコード:40010
+                  value:
+                    errorCode: 40010
+                    message: "指定カメラグループ存在なしエラー"
+                no_service_core:
+                  summary: エラーコード:40020
+                  value:
+                    errorCode: 40020
+                    message: "サービスコア情報取得エラー"
+
+        "409":
+          description: "組織重複"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 71000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "組織所属済みエラー"
+        "500":
+          description: "内部エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 40000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                avatar_error:
+                  summary: エラーコード:91200
+                  value:
+                    errorCode: 91200
+                    message: "CBES_アバター取得APIエラー"
+                camera_group_error:
+                  summary: エラーコード:91210
+                  value:
+                    errorCode: 91210
+                    message: "CBES_カメラグループ取得APIエラー"
+
+  # IF-UM-USER-0004 API
+  "/user/{user_mng_id}":
+    put:
+      tags:
+        - USER
+      summary: "ユーザー更新API <IF-UM-USER-0004>"
+      description: |
+        【処理概要】
+        1. 指定されたIDのユーザーがユーザー管理TBLに登録されているか確認
+        2. (2-4の処理はメールアドレスを更新する場合のみ) Cognito のユーザープールの Email も更新
+        3. カメラバックエンドの「アバター取得API」へリクエストを行い, アバターIDを取得
+        4. 3で取得した全てのアバターについて「アバター更新API」へのリクエストを行い,
+        ユーザーアクセスキー(メールアドレス)を更新
+        5. リクエストされた項目についてユーザー管理TBLの値を更新
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+        - in: path
+          name: user_mng_id
+          schema:
+            type: string
+          required: true
+          description: "ユーザー管理ID"
+          example: "9fdcde37-1ba1-2810-4d22-5699596fcfce"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0004_Request"
+              description: "ユーザー更新情報"
+              required:
+                - user_mng_id
+              type: object
+              properties:
+                mfa_type:
+                  description: "MFA種別<br>【マッピング】<br>0:未設定、1:Authenticatorアプリ、2:電話番号"
+                  type: integer
+                  example: 1
+                tel_no:
+                  description: "電話番号<br>MFA種別が「2:電話番号」の場合、必須"
+                  type: string
+                  example: "0123456789"
+                mail_address:
+                  description: "メールアドレス"
+                  type: string
+                  example: "example@test.secom.co.jp"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗<br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常<br>
+            ※bodyは400と同様
+
+  # IF-UM-USER-0005 API
+  "/user":
+    post:
+      tags:
+        - USER
+      summary: "ユーザー本登録API <IF-UM-USER-0005>"
+      description: >-
+        ユーザー本登録API<br><br>
+        salesforceからの場合、ユーザ名はDBより取得する
+      parameters:
+        - in: header
+          name: invitation-token
+          schema:
+            type: string
+          required: true
+          description: "招待トークンヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0005_Request"
+              description: "ユーザー本登録"
+              required:
+                - password
+              properties:
+                password:
+                  description: "Cognitoユーザーに設定するパスワード"
+                  type: string
+                  example: "Sights756!!"
+                user_name:
+                  description: "フルネーム<br>salesforceからの場合はnull想定、それ以外の場合は値必須"
+                  type: string
+                  example: "ユーザー１"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: "usercreate_Response"
+                description: "ユーザー本登録レスポンス"
+                type: object
+                properties:
+                  user_mng_id:
+                    description: "ユーザー管理ID"
+                    type: string
+                    example: "9fdcde37-1ba1-2810-4d22-5699596fcfce"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 10000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+              examples:
+                validation_error:
+                  summary: エラーコード:10000
+                  value:
+                    errorCode: 10000
+                    message: ""
+                user_name_error:
+                  summary: エラーコード:11000
+                  value:
+                    errorCode: 11000
+                    message: "ユーザー名未入力エラー"
+        "403":
+          description: "認可エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 30000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "招待トークンエラー"
+        "404":
+          description: "データなし"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                not_found_invitation:
+                  summary: エラーコード:40000
+                  value:
+                    errorCode: 40000
+                    message: "招待情報取得エラー"
+                salesforce_not_found_user:
+                  summary: エラーコード:40100
+                  value:
+                    errorCode: 40100
+                    message: "仮登録ユーザー情報取得エラー"
+                salesforce_not_found_contact:
+                  summary: エラーコード:40100
+                  value:
+                    errorCode: 40101
+                    message: "Salesforce_該当取引先データなし"
+        "409":
+          description: "ユーザー重複"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 71000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "Cognitoユーザー作成済み"
+        "410":
+          description: "データ無効"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                disabled_invite:
+                  summary: エラーコード:51000
+                  value:
+                    errorCode: 51000
+                    message: "招待無効"
+                expired_invite:
+                  summary: エラーコード:51010
+                  value:
+                    errorCode: 51010
+                    message: "招待有効期限切れ"
+        "500":
+          description: "内部エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                get_cognito_error:
+                  summary: エラーコード:90000
+                  value:
+                    errorCode: 90000
+                    message: "Cognito_ユーザー情報取得エラー"
+                create_cognito_error:
+                  summary: エラーコード:90100
+                  value:
+                    errorCode: 90100
+                    message: "Cognitoユーザー作成エラー"
+                salesforce_error:
+                  summary: エラーコード:90200
+                  value:
+                    errorCode: 90200
+                    message: "Salesforce連携-ユーザー本登録APIエラー"
+                delete_cognito_error:
+                  summary: エラーコード:90300
+                  value:
+                    errorCode: 90300
+                    message: "Cognitoユーザー削除エラー"
+                salesforce_contact_error:
+                  summary: エラーコード:91200
+                  value:
+                    errorCode: 91200
+                    message: "Salesforce_取引先データ取得エラー"
+                salesforce_update_error:
+                  summary: エラーコード:91300
+                  value:
+                    errorCode: 91300
+                    message: "Salesforce_データ更新エラー"
+                salesforce_auth_error:
+                  summary: エラーコード:93000
+                  value:
+                    errorCode: 93000
+                    message: "Salesforce認証エラー"
+
+  # IF-UM-USER-0006 API
+  "/user/avatar/{avatar_id}":
+    delete:
+      tags:
+        - USER
+      summary: "アバター削除API <IF-UM-USER-0006>"
+      description: CBESのアバターデータを削除するAPI
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+        - in: path
+          name: avatar_id
+          schema:
+            type: integer
+          required: true
+          description: "アバターID"
+          example: 1
+      responses:
+        "200":
+          description: 正常終了
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: "処理結果"
+                    type: integer
+                    example: 0
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 11000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "パラメータ不正エラー（avatar_id）"
+        "403":
+          description: "認可エラー"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                cognito_error:
+                  summary: エラーコード:30000
+                  value:
+                    errorCode: 30000
+                    message: "認可無効"
+                decode_error:
+                  summary: エラーコード:30001
+                  value:
+                    errorCode: 30001
+                    message: "IDトークンデコード処理エラー"
+                admin_error:
+                  summary: エラーコード:30010
+                  value:
+                    errorCode: 30001
+                    message: "認可無効"
+        "404":
+          description: データなし
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 40000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "アバター情報取得エラー"
+        "410":
+          description: リソースなし
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 80000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "アバター情報削除エラー"
+        "500":
+          description: 内部エラー
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                  message:
+                    type: string
+                    description: エラーメッセージ
+              examples:
+                cognito_error:
+                  summary: エラーコード:91200
+                  value:
+                    errorCode: 91200
+                    message: "CBES_アバター取得APIエラー"
+                decode_error:
+                  summary: エラーコード:91210
+                  value:
+                    errorCode: 91210
+                    message: "CBES_アバター削除APIエラー"
+
+  # IF-UM-USER-0008
+  "/user/mfa":
+    post:
+      tags:
+        - USER
+      summary: "MFAリセット要求API <IF-UM-USER-0008>"
+      description: >-
+        MFAリセット要求API<br><br>
+        【処理概要】<br>
+          ・メールをリクエストで設定したユーザー宛に送る<br>
+          ・レスポンスとして、アクセストークンを発行（発行したトークンはTBLに保存しておく）
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0008_Request"
+              description: "MFAリセット要求リクエスト"
+              required:
+                - username
+              type: object
+              properties:
+                username:
+                  description: "Cognito認証で取得するusername"
+                  type: string
+                  example: "003a8431-bdba-4aad-b0db-9c4c7ea4a94f"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗<br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常<br>
+            ※bodyは400と同様
+
+    # IF-UM-USER-0009 API
+    put:
+      tags:
+        - USER
+      summary: "MFAリセット実行API <IF-UM-USER-0009>"
+      description: |
+        MFAリセット実行API<br><br>
+        【処理概要】<br>
+        ・ユーザー管理TBLに登録されているトークンとリクエストのトークンが一致していればMFAリセット<br>
+        ・リセット後にユーザー管理TBLのトークンを削除
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0009_Request"
+              description: "MFAリセット実行リクエスト"
+              required:
+                - token
+              type: object
+              properties:
+                token:
+                  description: "トークン"
+                  type: string
+                  example: "eyJraWQiOiJiV3MySnQxM2IyU2xNVXJcL04xeWxzOExJam5CMlVIQ2xEWGdcLzd5VDVRYWc9IiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiJhN2I0NzMyNS00MzNkLTQ4ZWQtODlmNi05ZmIyN2ZhNzBlZTUiLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAuYXAtbm9ydGhlYXN0LTEuYW1hem9uYXdzLmNvbVwvYXAtbm9ydGhlYXN0LTFfbGpENWRDZ0Y1IiwiY2xpZW50X2lkIjoiN3BscWs1dHFxaG5hMGY4N241Y2Zpc2FodXEiLCJvcmlnaW5fanRpIjoiNmMxM2MyZWEtMWFhNi00NTY5LWE4N2ItYjgwMWQzZjY4YmYzIiwiZXZlbnRfaWQiOiI1MGRiZDllNS04OGZkLTQ5MGItOTZhNi0yYTc0ZDRlY2VkNjQiLCJ0b2tlbl91c2UiOiJhY2Nlc3MiLCJzY29wZSI6ImF3cy5jb2duaXRvLnNpZ25pbi51c2VyLmFkbWluIiwiYXV0aF90aW1lIjoxNjY1NDkwNjQxLCJleHAiOjE2NjU0OTQyNDEsImlhdCI6MTY2NTQ5MDY0MSwianRpIjoiMTBkNWRiMTMtYzUwNC00MzExLWJiM2QtNDAwZDg1ZGEwMmY0IiwidXNlcm5hbWUiOiI4MDAwMDMifQ.g9yjU0l-fEdja-KwAIfDoZCqRGD3PN96-BXI5NTWCkD_spS_-PQeS1OM-0PjxhezzkcP-BHz5W6mnp5Il5qJQjDhhx8oSdp29vGnajMD2N1Ool07GCaTHuLRgYbyzOCje8nXuD68mYfTbmD775tHN7Kcu4tJzs6cx5f3eV85N76abbB7PbTnhgCFBXZZ1dJA_BoH17IjALk08kfXWvKIUIZUQJQk2fHCFtC_gw3Evw7ey-9_Bx1ERJPb5rvsWvgGzSXX5eGL8mMkNJmTRr4Cq0REEVmcqbC2FNnt-lynjkrtC8R_lsJeH9Gj_tWxMVZBpnv5e9sA2VN1z2qTuBj-dg"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗<br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常<br>
+            ※bodyは400と同様
+
+  # IF-UM-USER-0010 API
+  "/user/id":
+    get:
+      tags:
+        - USER
+      summary: "ユーザー管理ID取得API<IF-UM-USER-0010>"
+      description: >-
+        ユーザー管理ID取得API
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+        - in: query
+          name: mail_address
+          schema:
+            type: string
+          required: true
+          description: "メールアドレス"
+          example: "test@secom.sights.co.jp"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: "user_mng_id_Response"
+                description: "ユーザー管理IDレスポンス"
+                type: object
+                properties:
+                  user_mng_id:
+                    description: "ユーザー管理ID"
+                    type: string
+                    example: "a88c1f7b-c45a-00eb-8f33-a0464ba3689f"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗
+            <br>
+            ※bodyは400と同様
+        "404":
+          description: >-
+            データなし
+            <br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常
+            <br>
+            ※bodyは400と同様
+
+  # IF-UM-USER-0011 API
+  "/temporary_user/owner":
+    post:
+      tags:
+        - USER
+      summary: "管理者一時ユーザー作成API <IF-UM-USER-0011>"
+      description: >-
+        管理者一時ユーザー作成API<br><br>
+        Salesforceにてサービス登録されたユーザーのアバター(管理者)登録用の招待メールを送信するAPI
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0011_Request"
+              description: "管理者ユーザー情報"
+              required:
+                - mail_address
+                - camera_directory_id
+                - service_core_name
+              type: object
+              properties:
+                mail_address:
+                  description: "メールアドレス"
+                  type: string
+                  example: "example@xxx.com"
+                camera_directory_id:
+                  description: "カメラディレクトリID"
+                  type: integer
+                  example: 3
+                service_core_name:
+                  description: "サービスコア名"
+                  type: string
+                  example: "自宅"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗<br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常<br>
+            ※bodyは400と同様
+
+  # IF-UM-USER-0012 API
+  "/user/owner":
+    post:
+      tags:
+        - USER
+      summary: "申込ユーザー登録API <IF-UM-USER-0012>"
+      description: >-
+        申込ユーザー登録API<br><br>
+        申し込みユーザーをCognitoへ登録し、一時パスワード更新用の招待メールを送信するAPI
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0012_Request"
+              description: "申込ユーザー情報"
+              required:
+                - mail_address
+              type: object
+              properties:
+                mail_address:
+                  description: "メールアドレス"
+                  type: string
+                  example: "example@xxx.com"
+                regist_from:
+                  description: "登録元<br>0:カスタマーポータル、1:salesforce「SightsID作成依頼」<br>※値が存在しない場合は処理内で「0」を設定する<br>※Webからは値なしでリクエストされる想定"
+                  type: integer
+                  example: 1
+                salesforce_contact_id:
+                  description: "Salesforce取引先責任者ID<br>regist_fromが1の場合、必須"
+                  type: string
+                  example: "0035D00001V8nClQAJ"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/errorResponse"
+        "401":
+          description: >-
+            認証失敗<br>
+            ※bodyは400と同様
+        "409":
+          description: >-
+            登録内容の重複<br>
+            ※bodyは400と同様
+        "500":
+          description: >-
+            サーバ内部異常<br>
+            ※bodyは400と同様
+
+  # IF-UM-USER-0012 API
+  "/user/application":
+    post:
+      tags:
+        - USER
+      summary: "新規ユーザー申込API <IF-UM-USER-0012>"
+      description: >-
+        新規ユーザー申込API<br><br>
+        申込した新規ユーザーの情報を登録し、招待メールを送信するAPI
+      parameters:
+        - in: header
+          name: authorization
+          schema:
+            type: string
+          required: true
+          description: "Authorizationヘッダ"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              title: "IF-UM-USER-0012_Request"
+              description: "申込ユーザー情報"
+              required:
+                - mail_address
+              type: object
+              properties:
+                mail_address:
+                  description: "メールアドレス"
+                  type: string
+                  example: "example@xxx.com"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: "処理結果。0：正常終了、1：異常終了"
+                    type: integer
+                    example: 0
+        "400":
+          description: "不正リクエスト"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 10000
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: ""
+        "409":
+          description: "登録内容の重複"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorCode:
+                    type: integer
+                    description: エラーコード
+                    example: 71002
+                  message:
+                    type: string
+                    description: エラーメッセージ
+                    example: "ユーザー作成済みエラー"
+              examples:
+                cognito_error:
+                  summary: エラーコード:71002
+                  value:
+                    errorCode: 71002
+                    message: "ユーザー作成済みエラー"
+                decode_error:
+                  summary: エラーコード:71003
+                  value:
+                    errorCode: 71003
+                    message: "Cognito_ユーザー作成済みエラー"
+
+components:
+  schemas:
+    ApiResponse:
+      description: >-
+        汎用APIレスポンスオブジェクト。
+        処理結果を返す。
+      type: object
+      properties:
+        result:
+          description: "処理結果。0：正常終了、1：異常終了"
+          type: integer
+    errorResponse:
+      description: >-
+        汎用APIエラーレスポンスオブジェクト。
+      type: object
+      properties:
+        errorCode:
+          description: >-
+            エラーコード<br>
+            10000～19999：リクエストパラメータやリクエストデータに起因するエラー<br>
+            20000～29999：認証に関するエラー<br>
+            30000～39999：権限に関するエラー<br>
+            40000～49999：リソースの不在に関するエラー<br>
+            50000～59999：メソッドの不適切な使用に関するエラー<br>
+            60000～69999：タイムアウト<br>
+            70000～79999：リソースの重複<br>
+            80000～89999：削除済みリソース<br>
+            90000～99999：内部エラー<br>
+          type: integer
+          example: 10000
+        message:
+          description: "エラーメッセージ"
+          type: string
+          example: "エラーメッセージ"
