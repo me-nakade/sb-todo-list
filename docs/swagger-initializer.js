@@ -4,8 +4,8 @@ window.onload = function() {
   // the following lines will be replaced by docker/configurator, when it runs in a docker-container
   window.ui = SwaggerUIBundle({
     urls: [
-      { url:"https://me-nakade.github.io/sb-todo-list/sample_API.yaml", name:"Sample API" },
-      { url:"https://me-nakade.github.io/sb-todo-list/user_mng_API.yaml", name:"User API" }
+      { url:"https://me-nakade.github.io/sb-todo-list/api_design/sample_API.yaml", name:"Sample API" },
+      { url:"https://me-nakade.github.io/sb-todo-list/api_design/user_mng_API.yaml", name:"User API" }
     ],
     //url: "https://petstore.swagger.io/v2/swagger.json",
     dom_id: '#swagger-ui',
