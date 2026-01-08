@@ -1,0 +1,41 @@
+name: Auto-update Swagger UI urls
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs/api_design/*.yaml'
+      - 'docs/swagger/swagger-initializer.js'
+      - '.github/workflows/swagger-urls.yml'
+
+jobs:
+  update-urls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update urls array in swagger-config.js
+        run: |
+          echo "// AUTO-GENERATED-URLS-START" > tmp_urls.txt
+          for f in docs/api_design/*.yaml; do
+            fname=$(basename "$f")
+            title=$(awk '/^info:/ {inf=1} inf && /^  title:/ {print; exit}' "$f" | sed -e 's/^  title:[ ]*//;s/"//g')
+            [ -z "$title" ] && title="$fname"
+            echo "      { url:\"https://me-nakade.github.io/sb-todo-list/api_design/$fname\", name:\"$title\" }," >> tmp_urls.txt
+          done
+          echo "// AUTO-GENERATED-URLS-END" >> tmp_urls.txt
+
+          awk '
+          BEGIN {inside=0}
+          /\/\/ AUTO-GENERATED-URLS-START/ {inside=1; while((getline line < "tmp_urls.txt") > 0) print line; next}
+          /\/\/ AUTO-GENERATED-URLS-END/ {inside=0; next}
+          {if(!inside) print $0}
+          ' docs/swagger-config.js > docs/swagger/swagger-initializer.tmp.js && mv docs/swagger/swagger-initializer.tmp.js docs/swagger/swagger-initializer.js
+
+      - name: Commit updated swagger-initializer.js
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add docs/swagger/swagger-initializer.js
+          git commit -m "Auto-update Swagger UI urls array" || exit 0
+          git push
