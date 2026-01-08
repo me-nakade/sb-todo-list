@@ -2,7 +2,7 @@ name: Auto-generate Swagger UI urls config
 
 on:
   push:
-    branches: [ main ]
+    branches: [ xxx ]
     paths:
       - 'docs/api_design/*.yaml'
       - '.github/workflows/autogenerate-swagger-urls.yml'
