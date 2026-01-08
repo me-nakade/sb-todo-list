@@ -30,7 +30,7 @@ jobs:
           /\/\/ AUTO-GENERATED-URLS-START/ {inside=1; while((getline line < "tmp_urls.txt") > 0) print line; next}
           /\/\/ AUTO-GENERATED-URLS-END/ {inside=0; next}
           {if(!inside) print $0}
-          ' docs/swagger-config.js > docs/swagger/swagger-initializer.tmp.js && mv docs/swagger/swagger-initializer.tmp.js docs/swagger/swagger-initializer.js
+          ' docs/swagger/swagger-initializer.js > docs/swagger/swagger-initializer.tmp.js && mv docs/swagger/swagger-initializer.tmp.js docs/swagger/swagger-initializer.js
 
       - name: Commit updated swagger-initializer.js
         run: |
