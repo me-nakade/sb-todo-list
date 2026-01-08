@@ -17,7 +17,7 @@ jobs:
           echo 'window.onload = function() {' > docs/swagger/swagger-initializer.js
           echo '  const ui = SwaggerUIBundle({' >> docs/swagger/swagger-initializer.js
           echo '    urls: [' >> docs/swaggerswagger-initializer.js
-          for i in docs/*.yaml; do
+          for i in docs/api_design/*.yaml; do
             fname=$(basename "$i")
             # OpenAPIのinfo.titleを抜き出す
             title=$(awk '/^info:/ {inf=1} inf && /^  title:/ {print; exit}' "$i" | sed -e 's/^  title:[ ]*//;s/"//g')
