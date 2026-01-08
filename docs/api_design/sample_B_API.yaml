@@ -17,7 +17,7 @@ info:
     * **2025年12月16日**：**ユーザー問合せ登録API**、**ユーザ更新API** 追加
 
 tags:
-  - name: PICUTURES
+  - name: PICTURES
     description: "写真管理API"
   - name: SPRT
     description: "問合せAPI"
@@ -26,7 +26,7 @@ paths:
   "/sample/user/{user_id}":
     get:
       tags:
-        - PICUTURES
+        - PICTURES
       summary: "ユーザ情報取得API"
       description: >-
         ここに説明を書きます。
@@ -179,7 +179,7 @@ paths:
   "/user/avatar":
     post:
       tags:
-        - PICUTURES
+        - PICTURES
       summary: "アバター作成API"
       description: ユーザー本登録後にアバター情報を作成するAPI
       parameters:
@@ -200,7 +200,7 @@ paths:
         content:
           application/json:
             schema:
-              title: "PICUTURES_Sample_Request"
+              title: "PICTURES_Sample_Request"
               description: "アバター情報"
               required:
                 - user_id
@@ -330,7 +330,7 @@ paths:
   "/user/{user_id}":
     put:
       tags:
-        - PICUTURES
+        - PICTURES
       summary: "ユーザー更新API"
       description: |
         【処理概要】を書いてみたり
@@ -396,7 +396,7 @@ paths:
   "/user/avatar/{avatar_id}":
     delete:
       tags:
-        - PICUTURES
+        - PICTURES
       summary: "アバター削除API"
       description: アバターデータを削除するAPI
       parameters:
