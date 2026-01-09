@@ -8,6 +8,9 @@ on:
       - 'docs/swagger/swagger-initializer.js'
       - '.github/workflows/swagger-urls.yml'
 
+permissions:
+  contents:  write
+
 jobs:
   update-urls:
     runs-on: ubuntu-latest
