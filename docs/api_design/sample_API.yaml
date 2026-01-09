@@ -29,7 +29,7 @@ paths:
         - USER
       summary: "ユーザ情報取得API"
       description: >-
-        ここに説明を書きます。
+        ここに説明を書きます。すると、みんな理解できて嬉しい。
       parameters:
         - in: header
           name: authorization
