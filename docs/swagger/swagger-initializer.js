@@ -6,6 +6,7 @@ window.onload = function() {
     urls: [
 // AUTO-GENERATED-URLS-START
       { url:"https://me-nakade.github.io/sb-todo-list/api_design/sample_API.yaml", name:"サンプルAPI 一覧" },
+      { url:"https://me-nakade.github.io/sb-todo-list/api_design/todo_API.yaml", name:"Todo List API" },
       { url:"https://me-nakade.github.io/sb-todo-list/api_design/user_mng_API.yaml", name:"ユーザー管理API 一覧" },
 // AUTO-GENERATED-URLS-END
     ],
