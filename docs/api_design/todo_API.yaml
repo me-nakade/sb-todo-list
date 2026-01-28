@@ -1,0 +1,114 @@
+openapi: 3.0.0
+info:
+  title: Todo List API
+  description: Todoリスト管理API 一覧
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+tags:
+  - name: Todo
+    description: Todoアイテムの管理
+
+paths:
+  /api/todos:
+    get:
+      tags:
+        - Todo
+      summary: すべてのTodoアイテムを取得
+      description: 登録されているすべてのTodoアイテムのリストを返します
+      operationId: getAllTodos
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Todo'
+    
+    post:
+      tags:
+        - Todo
+      summary: 新しいTodoアイテムを追加
+      description: 新しいTodoアイテムを作成してリストに追加します
+      operationId: addTodo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoInput'
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Todo'
+
+  /api/todos/{id}:
+    delete:
+      tags:
+        - Todo
+      summary: Todoアイテムを削除
+      description: 指定されたIDのTodoアイテムを削除します
+      operationId: deleteTodo
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 削除するTodoアイテムのID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 削除成功
+        '404':
+          description: 指定されたIDのTodoが見つかりません
+
+components:
+  schemas:
+    Todo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: TodoアイテムのID（自動生成）
+          example: 1
+        title:
+          type: string
+          description: Todoのタイトル
+          example: "買い物に行く"
+        deadline:
+          type: string
+          description: 期限
+          example: "2026-01-31"
+        notes:
+          type: string
+          description: メモ
+          example: "牛乳、卵、パンを買う"
+      required:
+        - id
+        - title
+    
+    TodoInput:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Todoのタイトル
+          example: "買い物に行く"
+        deadline:
+          type: string
+          description: 期限
+          example: "2026-01-31"
+        notes:
+          type: string
+          description: メモ
+          example: "牛乳、卵、パンを買う"
+      required:
+        - title
